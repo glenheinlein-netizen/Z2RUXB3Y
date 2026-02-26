@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Z2RUXB3Y Panel</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<style>
+body{
+  margin:0;
+  font-family:monospace;
+  background:#0f0f0f;
+  color:#00ff99;
+}
+
+header{
+  background:#111;
+  padding:15px;
+  text-align:center;
+  font-size:22px;
+  border-bottom:1px solid #00ff99;
+}
+
+.container{
+  padding:20px;
+}
+
+.card{
+  border:1px solid #00ff99;
+  padding:15px;
+  margin-bottom:20px;
+  border-radius:8px;
+  background:#111;
+}
+
+button{
+  background:#00ff99;
+  border:none;
+  padding:8px 15px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+input{
+  padding:8px;
+  background:black;
+  color:#00ff99;
+  border:1px solid #00ff99;
+}
+
+#map{
+  height:300px;
+  width:100%;
+}
+</style>
+</head>
+<body>
+
+<header>⚡ Z2RUXB3Y SYSTEM PANEL ⚡</header>
+
+<div class="container">
+
+<div class="card" id="loginBox">
+<h3>Admin Login</h3>
+<input type="password" id="pass" placeholder="Enter Password">
+<button onclick="login()">Login</button>
+</div>
+
+<div id="panel" style="display:none;">
+
+<div class="card">
+<h3>System Info</h3>
+<p id="ip">IP: Loading...</p>
+<p id="location">Location: Loading...</p>
+<p id="browser">Browser: Loading...</p>
+<p id="os">OS: Loading...</p>
+<p id="screen">Screen: Loading...</p>
+<p id="time">Time: Loading...</p>
+<p id="online">Connection: Loading...</p>
+<p id="battery">Battery: Loading...</p>
+</div>
+
+<div class="card">
+<h3>Location Map</h3>
+<div id="map"></div>
+</div>
+
+<div class="card">
+<h3>Battery Chart</h3>
+<canvas id="chart"></canvas>
+</div>
+
+</div>
+
+<script>
+// LOGIN
+function login(){
+  let password = document.getElementById("pass").value;
+  if(password === "1234"){
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("panel").style.display="block";
+  } else {
+    alert("Wrong password");
+  }
+}
+
+// Time
+function updateTime(){
+  document.getElementById("time").innerText = 
+  "Time: " + new Date().toLocaleString();
+}
+setInterval(updateTime,1000);
+
+// Online
+document.getElementById("online").innerText =
+"Connection: " + (navigator.onLine ? "Online ✅" : "Offline ❌");
+
+// Screen
+document.getElementById("screen").innerText =
+"Resolution: " + screen.width + "x" + screen.height;
+
+// Browser
+document.getElementById("browser").innerText =
+"Browser: " + navigator.userAgent;
+
+// OS
+document.getElementById("os").innerText =
+"Platform: " + navigator.platform;
+
+// Battery
+if(navigator.getBattery){
+navigator.getBattery().then(function(battery){
+document.getElementById("battery").innerText =
+"Battery: " + Math.floor(battery.level*100) + "%";
+
+let ctx = document.getElementById('chart');
+new Chart(ctx, {
+type: 'bar',
+data: {
+labels: ['Battery'],
+datasets: [{
+label: 'Battery Level %',
+data: [Math.floor(battery.level*100)],
+backgroundColor: ['#00ff99']
+}]
+},
+options:{
+scales:{y:{beginAtZero:true,max:100}}
+}
+});
+});
+} else {
+document.getElementById("battery").innerText =
+"Battery: Not Supported";
+}
+
+// IP + Location
+fetch("https://ipapi.co/json/")
+.then(res => res.json())
+.then(data => {
+document.getElementById("ip").innerText = "IP: " + data.ip;
+document.getElementById("location").innerText = "Location: " + data.country_name + " / " + data.city;
+
+// Map
+let map = L.map('map').setView([data.latitude, data.longitude], 10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+L.marker([data.latitude, data.longitude]).addTo(map)
+.bindPopup("You are here").openPopup();
+
+})
+.catch(err=>{
+document.getElementById("ip").innerText="IP: Error";
+document.getElementById("location").innerText="Location: Error";
+});
+</script>
+
+</body>
+  </html>
+  Commit new file
