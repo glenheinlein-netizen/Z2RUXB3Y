@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>𓆩 𝙕2𝙍𝙐𝙓.𝘽3𝙔𓆪 Panel</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<style>
+body, html{margin:0;padding:0;font-family:monospace;height:100%;overflow:hidden;}
+body{
+  background: linear-gradient(-45deg,#0f0f0f,#111,#0f0f0f,#111);
+  background-size:400% 400%;
+  animation:gradientBG 15s ease infinite;
+  color:#00ff99;
+}
+@keyframes gradientBG{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+
+header{text-align:center;padding:15px;font-size:22px;border-bottom:1px solid #00ff99;}
+
+.container{padding:20px;text-align:center;}
+button{margin:10px;padding:10px 20px;font-weight:bold;border:none;border-radius:8px;background:#00ff99;color:#000;cursor:pointer;transition:.3s;}
+button:hover{transform:translateY(-3px);}
+.module{display:none;margin-top:20px;}
+.card{border:1px solid #00ff99;padding:15px;margin:auto;margin-bottom:20px;border-radius:8px;background:#111;box-shadow:0 0 10px rgba(0,255,153,0.2);}
+#map{height:300px;width:100%;}
+
+footer{position:fixed;bottom:0;width:100%;background:#111;padding:15px;text-align:center;border-top:1px solid #00ff99;}
+footer a{color:#00ff99;text-decoration:none;margin:0 10px;}
+</style>
+</head>
+<body>
+
+<header>𓆩 𝙕2𝙍𝙐𝙓.𝘽3𝙔𓆪 SYSTEM PANEL</header>
+
+<div class="container">
+<button onclick="openModule('infoModule')">Sistem Info</button>
+<button onclick="openModule('mapModule')">Harita</button>
+<button onclick="openModule('batteryModule')">Batarya</button>
+<button onclick="openModule('codeModule')">Kod Yardımcısı</button>
+
+<div id="infoModule" class="module card">
+<h3>Sistem Info</h3>
+<p id="ip">IP: Loading...</p>
+<p id="location">Location: Loading...</p>
+<p id="browser">Browser: Loading...</p>
+<p id="os">OS: Loading...</p>
+<p id="screen">Screen: Loading...</p>
+<p id="time">Time: Loading...</p>
+<p id="online">Connection: Loading...</p>
+<p id="battery">Battery: Loading...</p>
+</div>
+
+<div id="mapModule" class="module card">
+<h3>Harita</h3>
+<div id="map"></div>
+</div>
+
+<div id="batteryModule" class="module card">
+<h3>Batarya</h3>
+<canvas id="chart"></canvas>
+</div>
+
+<div id="codeModule" class="module card">
+<h3>Kod Yardımcısı</h3>
+<p>Buraya kod isteği yazılacak.</p>
+</div>
+</div>
+
+<footer>
+<a href="https://wa.me/628984930720" target="_blank">WhatsApp</a>
+<a href="https://instagram.com/motorcu
+_shadow.65" target="_blank">Instagram</a>
+<a href="https://tiktok.com/@z2rux.b3y" target="_blank">TikTok</a>
+</footer>
+
+<script>
+// Modülleri aç/kapa
+function openModule(id){
+  document.querySelectorAll(".module").forEach(m=>m.style.display="none");
+  document.getElementById(id).style.display="block";
+}
+
+// Zaman
+function updateTime(){document.getElementById("time").innerText="Time: "+new Date().toLocaleString();}
+setInterval(updateTime,1000);
+
+// Online
+document.getElementById("online").innerText="Connection: "+(navigator.onLine?"Online ✅":"Offline ❌");
+
+// Screen
+document.getElementById("screen").innerText="Resolution: "+screen.width+"x"+screen.height;
+
+// Browser
+document.getElementById("browser").innerText="Browser: "+navigator.userAgent;
+
+// OS
+document.getElementById("os").innerText="Platform: "+navigator.platform;
+
+// Batarya + Chart
+if(navigator.getBattery){
+navigator.getBattery().then(function(battery){
+document.getElementById("battery").innerText="Battery: "+Math.floor(battery.level*100)+"%";
+let ctx=document.getElementById('chart');
+new Chart(ctx,{type:'bar',data:{labels:['Battery'],datasets:[{label:'Battery Level %',data:[Math.floor(battery.level*100)],backgroundColor:['#00ff99']}]},options:{scales:{y:{beginAtZero:true,max:100}}}});
+});
+}else{document.getElementById("battery").innerText="Battery: Not Supported";}
+
+// IP + Location + Map
+fetch("https://ipapi.co/json/")
+.then(res=>res.json())
+.then(data=>{
+document.getElementById("ip").innerText="IP: "+data.ip;
+document.getElementById("location").innerText="Location: "+data.country_name+" / "+data.city;
+let map=L.map('map').setView([data.latitude,data.longitude],10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(map);
+L.marker([data.latitude,data.longitude]).addTo(map).bindPopup("You are here").openPopup();
+})
+.catch(err=>{document.getElementById("ip").innerText="IP: Error";document.getElementById("location").innerText="Location: Error";});
+</script>
+
+</body>
+  </html>
